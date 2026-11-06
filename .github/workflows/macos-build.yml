@@ -1,0 +1,40 @@
+name: Optional macOS host build
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_id:
+        description: Existing upstream profile title ID (16 hexadecimal characters)
+        required: true
+        type: string
+        default: '010015100B514000'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - name: Check out agent guidance
+        uses: actions/checkout@v4
+      - name: Check out upstream source
+        uses: actions/checkout@v4
+        with:
+          repository: seedds/nxnative
+          ref: main
+          path: nxnative
+          persist-credentials: false
+      - name: Validate title ID
+        env:
+          GAME_ID: ${{ inputs.game_id }}
+        run: |
+          case "$GAME_ID" in
+            *[!0-9A-Fa-f]*|'') echo 'Invalid title ID' >&2; exit 2 ;;
+          esac
+          test "${#GAME_ID}" -eq 16 || { echo 'Title ID must be 16 hex characters' >&2; exit 2; }
+      - name: Build host
+        env:
+          GAME_ID: ${{ inputs.game_id }}
+        run: make -C nxnative/dm/host "GAME=$GAME_ID" dmhost
