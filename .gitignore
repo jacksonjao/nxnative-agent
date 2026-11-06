@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+*.dmp
+*.ips
+*.xcarchive/
+DerivedData/
+build/
+dist/
+__pycache__/
+.venv/
+venv/
+experiments/private/
